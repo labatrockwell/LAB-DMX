@@ -12,7 +12,7 @@ import artnet4j.packets.ArtDmxPacket;
 /**
  * A universe of DMX Devices
  */
-public class DmxUniverse
+class DmxUniverse
 {
     // The parent network
     ArtNet an;

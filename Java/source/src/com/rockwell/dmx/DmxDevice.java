@@ -10,7 +10,7 @@ import artnet4j.ArtNet;
 /**
  * Shared functionality amongst all DMX Device implementations
  */
-public class DmxDevice
+class DmxDevice
 {
     // Parent dmx network
     ArtNet an;

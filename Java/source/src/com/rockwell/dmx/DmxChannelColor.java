@@ -3,7 +3,7 @@ package com.rockwell.dmx;
 /**
  * Class to represent a 3-channel DMX color
  */
-public class DmxChannelColor
+class DmxChannelColor
 {
     private float[] values = new float[3];
     
