@@ -83,19 +83,7 @@ class DmxUniverse
      * Add a device to this universe
      */
     public void addDevice(int channelCount, int colorCount) {
-        dmxDevices.add(new DmxDevice(an, id, channelCount, colorCount));
-    }
-    
-    public void startIndependentDeviceAmbients(int fadeSpeed) {
-        for (DmxDevice d : dmxDevices) {
-            d.startAmbientMode(fadeSpeed);
-        }
-    }
-    
-    public void stopIndependentDeviceAmbients() {
-        for (DmxDevice d : dmxDevices) {
-            d.stopAmbientMode();
-        }
+        dmxDevices.add(new DmxDevice(channelCount, colorCount));
     }
 
     /**

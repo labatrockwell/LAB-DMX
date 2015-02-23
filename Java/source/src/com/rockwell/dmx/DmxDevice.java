@@ -1,21 +1,11 @@
 package com.rockwell.dmx;
 
-import java.util.Random;
-import java.util.Timer;
-import java.util.TimerTask;
-
-import artnet4j.ArtNet;
-
 
 /**
  * Shared functionality amongst all DMX Device implementations
  */
 class DmxDevice
 {
-    // Parent dmx network
-    ArtNet an;
-    // Parent universe
-    int universeId;
     // Number of channels we need to set on this device
     int channelClusters;
     // Current color of the device
@@ -29,19 +19,13 @@ class DmxDevice
     float redStep = 0, greenStep = 0, blueStep = 0;
     // Tell whether we need to refresh universe
     private boolean needRefresh = false;
-    // Timer for ambient white fade
-    Timer ambientTimer;
-    // Fade direction
-    boolean fadingToWhite = false;
 
     /**
      * Create a device
      * @param an device's network
      * @param universeId device's universe
      */
-    public DmxDevice (ArtNet an, int universeId, int channelClusters, int colorCount) {
-        this.an = an;
-        this.universeId = universeId;
+    public DmxDevice (int channelClusters, int colorCount) {
         this.channelClusters = channelClusters;
         this.colorCount = colorCount;
         channelBytes = new byte[this.channelClusters * colorCount];
@@ -123,35 +107,5 @@ class DmxDevice
      */
     private float constrainColor(float value, float min, float max) {
         return Math.min(Math.max(value, min), max);
-    }
-    
-    public void startAmbientMode(int fadeSpeed) {
-        ambientTimer = new Timer();
-        Random r = new Random();
-        int varSeconds = r.nextInt(5) + 2;
-        int fadeMillis = ((fadeSpeed/60) + varSeconds) * 1000;
-        ambientTimer.schedule(new AmbientTask(fadeSpeed), 0, fadeMillis);
-    }
-    
-    public void stopAmbientMode() {
-        ambientTimer.cancel();
-    }
-    
-    private class AmbientTask extends TimerTask {
-        int fadeSpeed;
-        public AmbientTask(int fadeSpeed) {
-            super();
-            this.fadeSpeed = fadeSpeed;
-        }
-        public void run() {
-            if (fadingToWhite) {
-                fadeColor(new DmxChannelColor(255,255,255), fadeSpeed);
-            }
-            else {
-
-                fadeColor(new DmxChannelColor(0,0,0), fadeSpeed);
-            }
-            fadingToWhite = !fadingToWhite;
-        }
     }
 }
