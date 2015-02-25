@@ -1,16 +1,19 @@
 package com.rockwell.dmx;
 
 /**
- * Class to represent a 3-channel DMX color
+ * Class to represent a 1 to 4 channel DMX color
  */
 class DmxChannelColor
 {
-    private float[] values = new float[3];
+    private float[] values;
     
-    public DmxChannelColor(float r, float g, float b) {
-        values[0] = r;
-        values[1] = g;
-        values[2] = b;
+    public DmxChannelColor(float[] values) throws DmxColorCountException{
+        if (values.length >= 1 && values.length <= 4) {
+            this.values = values;
+        }
+        else {
+            throw new DmxColorCountException();
+        }
     }
     
     /**
@@ -26,22 +29,31 @@ class DmxChannelColor
      */
     public byte[] getValues() {
         byte[] byteConversion = new byte[values.length];
-        byteConversion[0] = (byte)values[0];
-        byteConversion[1] = (byte)values[1];
-        byteConversion[2] = (byte)values[2];
+        for (int i = 0; i < values.length; i++) {
+            byteConversion[i] = (byte)values[i];
+        }
         return byteConversion;
     }
   
     public boolean equals(DmxChannelColor c) {
-        if (c.values[0] == values[0] && c.values[1] == values[1] &&c.values[2] == values[2]) {
-            return true;
+        if (c.values.length != values.length) {
+            return false;
         }
         else {
-            return false;
+            for (int i = 0; i < values.length; i++) {
+                if (values[i] != c.values[i]) {
+                    return false;
+                }
+            }
+            return true;
         }
     }
     
     public String toString() {
-        return ("r:" + values[0] + " g:" + values[1] + " b:" + values[2]);
+        String output = "DMX Color: ";
+        for (int i = 0; i < values.length; i++) {
+            output+= values[i] + " ";
+        }
+        return output;
     }
 }

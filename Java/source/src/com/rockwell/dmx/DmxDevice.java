@@ -9,14 +9,14 @@ class DmxDevice
     // Number of channels we need to set on this device
     int channelClusters;
     // Current color of the device
-    public DmxChannelColor currentColor = new DmxChannelColor(0,0,0);
+    public DmxChannelColor currentColor;
     // Bytes of all channels, based on the current color
     byte[] channelBytes;
     // Step counters for transition progress
     int stepsCompleted = 0;
     int targetSteps = 0;
     int colorCount;
-    float redStep = 0, greenStep = 0, blueStep = 0;
+    float[] colorStepValues;
     // Tell whether we need to refresh universe
     private boolean needRefresh = false;
 
@@ -29,32 +29,43 @@ class DmxDevice
         this.channelClusters = channelClusters;
         this.colorCount = colorCount;
         channelBytes = new byte[this.channelClusters * colorCount];
+        colorStepValues = new float[colorCount];
     }
 
     /**
      * Set the color of this device
      */
-    public synchronized void setColor(DmxChannelColor color)
-    {
+    public synchronized void setColor(DmxChannelColor color) throws DmxColorCountException {
         //System.out.println("Set color to " + color);
-        currentColor = color;
-        stepsCompleted = targetSteps;
-        needRefresh = true;
+        if (color.getColors().length == colorCount) {
+            currentColor = color;
+            stepsCompleted = targetSteps;
+            needRefresh = true;
+        }
+        else {
+            throw new DmxColorCountException();
+        }
     }
 
     /**
      * Start a color transition on this device
      */
-    public synchronized void fadeColor(DmxChannelColor color, int steps) {
-        stepsCompleted = 0;
-        targetSteps = steps;
-        float[] targetValues = color.getColors();
-        float[] currentValues = currentColor.getColors();
-        // Calculate increments for each rgb channel based on number of steps 
-        redStep = (targetValues[0] - currentValues[0])/steps;
-        greenStep = (targetValues[1] - currentValues[1])/steps;
-        blueStep = (targetValues[2] - currentValues[2])/steps;
-        needRefresh = true;
+    public synchronized void fadeColor(DmxChannelColor color, int steps) throws DmxColorCountException {
+
+        if (color.getColors().length == colorCount) {
+            stepsCompleted = 0;
+            targetSteps = steps;
+            float[] targetValues = color.getColors();
+            float[] currentValues = currentColor.getColors();
+            // Calculate increments for each rgb channel based on number of steps
+            for (int i = 0; i < currentValues.length; i++) {
+                colorStepValues[i] = (targetValues[i] - currentValues[i])/steps;
+            }
+            needRefresh = true;
+        }
+        else {
+            throw new DmxColorCountException();
+        }
     }
 
     public synchronized void stepFade() {
@@ -67,14 +78,21 @@ class DmxDevice
             // If we are in the midst of fading, continue
             float[] currentState = currentColor.getColors();
             
-            float newR = constrainColor(currentState[0] + redStep, 1, 254);
-            float newG = constrainColor(currentState[1] + greenStep, 1, 254);
-            float newB = constrainColor(currentState[2] + blueStep, 1, 254);
-
-            DmxChannelColor newColor = new DmxChannelColor(newR, newG, newB);
-            setColor(newColor);
-            stepsCompleted++;
-            needRefresh = true;
+            float[] newVals = new float[colorCount];
+            
+            for (int i = 0; i < currentState.length; i++) {
+                newVals[i] = constrainColor(currentState[i] + colorStepValues[i], 1, 254);
+            }
+            
+            try {
+                DmxChannelColor newColor = new DmxChannelColor(newVals);
+                setColor(newColor);
+                stepsCompleted++;
+                needRefresh = true;
+            }
+            catch (DmxColorCountException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -90,14 +108,14 @@ class DmxDevice
         }
         return channelBytes;
     }
-    
+
     /**
      * Indicate whether color has changed such that we need a refresh
      */
     public boolean needsRefresh() {
         return needRefresh;
     }
-    
+
     /**
      * Block color values to ensure 0-255 range
      * @param value color value to constrain

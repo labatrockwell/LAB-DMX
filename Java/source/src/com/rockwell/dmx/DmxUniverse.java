@@ -45,7 +45,14 @@ class DmxUniverse
      * @param color the color to set
      */
     public void setOne(int deviceId, DmxChannelColor color) {
-        dmxDevices.get(deviceId).setColor(color);
+        try
+        {
+            dmxDevices.get(deviceId).setColor(color);
+        }
+        catch (DmxColorCountException e)
+        {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -54,7 +61,14 @@ class DmxUniverse
      */
     public void setAll(DmxChannelColor color) {
         for (DmxDevice device : dmxDevices) {
-            device.setColor(color);
+            try
+            {
+                device.setColor(color);
+            }
+            catch (DmxColorCountException e)
+            {
+                e.printStackTrace();
+            }
         }
     }
     
@@ -65,7 +79,14 @@ class DmxUniverse
      * @param steps the number of steps to take
      */
     public void fadeOne(int deviceId, DmxChannelColor color, int steps) {
-        dmxDevices.get(deviceId).fadeColor(color, steps);
+        try
+        {
+            dmxDevices.get(deviceId).fadeColor(color, steps);
+        }
+        catch (DmxColorCountException e)
+        {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -75,7 +96,14 @@ class DmxUniverse
      */
     public void fadeAll(DmxChannelColor color, int steps) {
         for (DmxDevice device : dmxDevices) {
-            device.fadeColor(color, steps);
+            try
+            {
+                device.fadeColor(color, steps);
+            }
+            catch (DmxColorCountException e)
+            {
+                e.printStackTrace();
+            }
         }
     }
     
