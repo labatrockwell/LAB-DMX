@@ -15,19 +15,20 @@ public class DmxManager
     // The artnet to manage the install
     ArrayList<DmxUniverse> universes = new ArrayList<DmxUniverse>();
     ArtNet an;
+    int fadeSpeed;
 
     /**
      * Create the manager
-     * @param panelsPerUniverse number of panels in each panel universe
-     * @param pendantsPerUniverse number of pendants in each pendant universe
+     * @param universeCount number of universes
+     * @param deviceCount devices per universe
      */
-    public DmxManager() {
+    public DmxManager(String broadcastAddress, int universeCount, int[] deviceCount, int deviceChannels, int fadeSpeed) {
         an = new ArtNet();
 
         an.init();
 
         //Set Broadcast address as allowed by Art-Net revision Q
-        an.setBroadCastAddress("10.255.255.255");
+        an.setBroadCastAddress(broadcastAddress);
 
         try {
             //Start the server
@@ -35,6 +36,28 @@ public class DmxManager
             an.start();
         } catch (Exception e) {
             System.out.println("Error starting ArtNet Server!");
+            e.printStackTrace();
+        }
+        
+        for (int i = 0; i < universeCount; i++) {
+            addUniverse();
+        }
+        
+        for (int i = 0; i < universeCount; i++) {
+            for (int j = 0; j < deviceCount[i]; j++) {
+                universes.get(i).addDevice(deviceChannels, 3);
+            }
+            universes.get(i).begin();
+        }
+        this.fadeSpeed = fadeSpeed;
+        
+        float[] dark = {0f,0f,0f};
+        try
+        {
+            setAllColors(new DmxChannelColor(dark));
+        }
+        catch (DmxColorCountException e)
+        {
             e.printStackTrace();
         }
     }
@@ -53,6 +76,16 @@ public class DmxManager
     public void setAllColors(DmxChannelColor color) {
         for (DmxUniverse dmxu : universes) {
             dmxu.setAll(color);
+        }
+    }
+    
+    /**
+     * Uniformly fade all devices to a color
+     * @param color the color to set
+     */
+    public void fadeAllColors(DmxChannelColor color) {
+        for (DmxUniverse dmxu : universes) {
+            dmxu.fadeAll(color, fadeSpeed);
         }
     }
 

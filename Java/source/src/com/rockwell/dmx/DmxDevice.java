@@ -22,8 +22,6 @@ class DmxDevice
 
     /**
      * Create a device
-     * @param an device's network
-     * @param universeId device's universe
      */
     public DmxDevice (int channelClusters, int colorCount) {
         this.channelClusters = channelClusters;

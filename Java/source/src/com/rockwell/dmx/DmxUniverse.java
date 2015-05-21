@@ -153,7 +153,6 @@ class DmxUniverse
             for (DmxDevice d : dmxDevices) {
                 d.stepFade();
             }
-            
             refreshUniverse();
         }
     }
