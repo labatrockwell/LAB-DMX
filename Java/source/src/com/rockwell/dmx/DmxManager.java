@@ -1,9 +1,6 @@
 package com.rockwell.dmx;
 
 import java.util.ArrayList;
-import java.util.Timer;
-import java.util.TimerTask;
-
 import artnet4j.ArtNet;
 
 /**
@@ -47,7 +44,6 @@ public class DmxManager
             for (int j = 0; j < deviceCount[i]; j++) {
                 universes.get(i).addDevice(deviceChannels, 3);
             }
-            universes.get(i).begin();
         }
         this.fadeSpeed = fadeSpeed;
         
@@ -59,6 +55,10 @@ public class DmxManager
         catch (DmxColorCountException e)
         {
             e.printStackTrace();
+        }
+        
+        for (int i = 0; i < universeCount; i++) {
+            universes.get(i).begin();
         }
     }
 
